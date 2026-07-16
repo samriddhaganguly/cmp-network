@@ -1,0 +1,102 @@
+{
+  "generatedAt": "2026-07-16T23:50:04.592730+00:00",
+  "nodes": [
+    {
+      "id": "nganguli",
+      "name": "Nirmal Ganguli",
+      "inst": "IISER Bhopal",
+      "field": "mag",
+      "h": 3,
+      "tags": [],
+      "site": "\u2014",
+      "_semanticScholarId": "2230898382",
+      "_openalexId": "https://openalex.org/A5012918648"
+    },
+    {
+      "id": "jmeyer",
+      "name": "Julia S. Meyer",
+      "inst": "CEA Grenoble / Neel Institute",
+      "field": "gen",
+      "h": 0,
+      "tags": [],
+      "site": "\u2014",
+      "_semanticScholarId": null,
+      "_openalexId": "https://openalex.org/A5046997176"
+    },
+    {
+      "id": "jrobinson",
+      "name": "Jason W. A. Robinson",
+      "inst": "University of Cambridge",
+      "field": "sc",
+      "h": 9,
+      "tags": [],
+      "site": "\u2014",
+      "_semanticScholarId": "2238234588",
+      "_openalexId": "https://openalex.org/A5080196039"
+    },
+    {
+      "id": "nbirge",
+      "name": "Norman O. Birge",
+      "inst": "Michigan State University",
+      "field": "sc",
+      "h": 33,
+      "tags": [],
+      "site": "\u2014",
+      "_semanticScholarId": "5019407",
+      "_openalexId": "https://openalex.org/A5035668460"
+    },
+    {
+      "id": "agolubov",
+      "name": "Alexander A. Golubov",
+      "inst": "University of Twente",
+      "field": "sc",
+      "h": 1,
+      "tags": [],
+      "site": "\u2014",
+      "_semanticScholarId": "2369802714",
+      "_openalexId": "https://openalex.org/A5105975394"
+    },
+    {
+      "id": "meschrig",
+      "name": "Matthias Eschrig",
+      "inst": "Royal Holloway, University of London",
+      "field": "sc",
+      "h": 4,
+      "tags": [],
+      "site": "\u2014",
+      "_semanticScholarId": "2341330952",
+      "_openalexId": "https://openalex.org/A5006459139"
+    },
+    {
+      "id": "jlinder",
+      "name": "Jacob Linder",
+      "inst": "NTNU Trondheim",
+      "field": "sc",
+      "h": 36,
+      "tags": [],
+      "site": "\u2014",
+      "_semanticScholarId": "4866030",
+      "_openalexId": "https://openalex.org/A5052287133"
+    }
+  ],
+  "edges": [
+    {
+      "s": "jrobinson",
+      "t": "jlinder",
+      "papers": [
+        {
+          "title": "Transition between canted antiferromagnetic and spin-polarized ferromagnetic quantum Hall states in graphene on a ferrimagnetic insulator",
+          "venue": "Physical review B",
+          "year": 2019,
+          "arxiv": "1905.06866"
+        },
+        {
+          "title": "Signature of magnetic-dependent gapless odd frequency states at superconductor/ferromagnet interfaces",
+          "venue": "Nature Communications",
+          "year": 2015,
+          "arxiv": "1609.02905"
+        }
+      ]
+    }
+  ]
+}
