@@ -1,0 +1,2 @@
+requests>=2.31
+scholarly>=1.7

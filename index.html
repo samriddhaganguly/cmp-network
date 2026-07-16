@@ -1,0 +1,344 @@
+<style>
+  :root{
+    --bg:#0d1321;
+    --bg-panel:#121a2e;
+    --line:#22304d;
+    --ink:#e8ecf5;
+    --ink-dim:#8b97b5;
+    --sc:#5ec8d8;      /* superconductivity */
+    --topo:#b892e8;    /* topological */
+    --mag:#e0a458;     /* magnonics / spintronics */
+    --gen:#7f9ecb;     /* general CMP */
+    --edge:#3a4a70;
+    --edge-hot:#e8ecf5;
+    font-family: 'Source Serif 4','Iowan Old Style',Georgia,serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);height:100%;overflow:hidden;}
+  #app{position:relative;width:100%;height:100vh;background:
+       radial-gradient(circle at 20% 15%, #16213b 0%, transparent 45%),
+       radial-gradient(circle at 85% 80%, #14203a 0%, transparent 50%),
+       var(--bg);}
+
+  /* --- header --- */
+  #hdr{position:absolute;top:0;left:0;right:0;padding:22px 28px 14px;z-index:5;pointer-events:none;
+       display:flex;justify-content:space-between;align-items:flex-start;}
+  #hdr h1{font-size:19px;font-weight:600;letter-spacing:0.01em;margin:0 0 4px;}
+  #hdr .sub{font-family:'JetBrains Mono','SF Mono',monospace;font-size:11px;color:var(--ink-dim);letter-spacing:0.04em;}
+  #legend{pointer-events:auto;display:flex;gap:16px;background:rgba(18,26,46,0.7);border:1px solid var(--line);
+       border-radius:8px;padding:8px 14px;backdrop-filter:blur(6px);}
+  .leg-item{display:flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--ink-dim);}
+  .leg-dot{width:9px;height:9px;clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);}
+
+  #banner{position:absolute;bottom:16px;left:28px;z-index:5;font-family:'JetBrains Mono',monospace;
+    font-size:10.5px;color:var(--ink-dim);max-width:380px;line-height:1.5;pointer-events:none;
+    border-left:2px solid var(--edge);padding-left:10px;}
+  #banner b{color:var(--ink);}
+
+  svg{width:100%;height:100%;display:block;cursor:grab;}
+  svg:active{cursor:grabbing;}
+
+  .edge{fill:none;stroke:var(--edge);stroke-linecap:round;cursor:pointer;transition:stroke 0.15s;}
+  .edge:hover{stroke:var(--edge-hot);}
+  .edge-hit{fill:none;stroke:transparent;stroke-width:16px;cursor:pointer;}
+
+  .node-hex{stroke:#0d1321;stroke-width:2px;cursor:pointer;transition:filter 0.15s;}
+  .node-hex:hover{filter:brightness(1.25);}
+  .node-label{font-family:'Source Serif 4',Georgia,serif;font-size:11.5px;fill:var(--ink);pointer-events:none;
+      paint-order:stroke;stroke:#0d1321;stroke-width:3px;}
+  .node-inst{font-family:'JetBrains Mono',monospace;font-size:8.5px;fill:var(--ink-dim);pointer-events:none;
+      paint-order:stroke;stroke:#0d1321;stroke-width:3px;}
+
+  /* --- side panel --- */
+  #panel{position:absolute;top:0;right:0;height:100%;width:340px;background:var(--bg-panel);
+    border-left:1px solid var(--line);transform:translateX(100%);transition:transform 0.28s ease;
+    z-index:10;overflow-y:auto;padding:26px 22px;}
+  #panel.open{transform:translateX(0);}
+  #panel .eyebrow{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.08em;color:var(--ink-dim);
+     text-transform:uppercase;margin-bottom:6px;}
+  #panel h2{font-size:20px;margin:0 0 2px;line-height:1.25;}
+  #panel .role{font-size:12.5px;color:var(--ink-dim);margin-bottom:16px;}
+  #panel .field-tag{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:9.5px;
+     padding:2px 7px;border-radius:3px;margin:0 5px 5px 0;background:rgba(255,255,255,0.06);color:var(--ink-dim);}
+  #panel .stat-row{display:flex;gap:18px;margin:16px 0;padding:12px 0;border-top:1px solid var(--line);
+     border-bottom:1px solid var(--line);}
+  #panel .stat{display:flex;flex-direction:column;}
+  #panel .stat b{font-size:17px;font-family:'JetBrains Mono',monospace;}
+  #panel .stat span{font-size:9.5px;color:var(--ink-dim);text-transform:uppercase;letter-spacing:0.05em;}
+  #panel .paper{border-top:1px dashed var(--line);padding:11px 0;}
+  #panel .paper:first-of-type{border-top:none;}
+  #panel .paper-title{font-size:13px;line-height:1.4;margin-bottom:4px;}
+  #panel .paper-meta{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--ink-dim);}
+  #panel .coauthors{margin-top:18px;}
+  #panel .coauthors h3{font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink-dim);
+    font-family:'JetBrains Mono',monospace;font-weight:400;margin-bottom:8px;}
+  #panel .coauthor-pill{display:block;font-size:12.5px;padding:6px 0;border-bottom:1px solid var(--line);
+    cursor:pointer;color:var(--ink);}
+  #panel .coauthor-pill:hover{color:var(--sc);}
+  #closeBtn{position:absolute;top:20px;right:20px;background:none;border:none;color:var(--ink-dim);
+    font-size:18px;cursor:pointer;line-height:1;padding:4px;}
+  #closeBtn:hover{color:var(--ink);}
+  #panel a{color:var(--sc);text-decoration:none;font-size:11.5px;font-family:'JetBrains Mono',monospace;}
+  #panel a:hover{text-decoration:underline;}
+  #empty-hint{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;
+    color:var(--ink-dim);font-family:'JetBrains Mono',monospace;font-size:11px;pointer-events:none;opacity:0;
+    transition:opacity 0.3s;}
+</style>
+
+<div id="app">
+  <svg id="canvas"></svg>
+  <div id="hdr">
+    <div>
+      <h1>Condensed Matter · Collaboration Lattice</h1>
+      <div class="sub">nodes = investigators · edges = joint publications · drag to explore</div>
+    </div>
+    <div id="legend">
+      <div class="leg-item"><span class="leg-dot" style="background:var(--sc)"></span>superconductivity</div>
+      <div class="leg-item"><span class="leg-dot" style="background:var(--topo)"></span>topological matter</div>
+      <div class="leg-item"><span class="leg-dot" style="background:var(--mag)"></span>magnonics / spintronics</div>
+      <div class="leg-item"><span class="leg-dot" style="background:var(--gen)"></span>general CMP</div>
+    </div>
+  </div>
+  <div id="banner"><b>Demo dataset.</b> Node/edge details below are illustrative placeholders, not verified publication records — see chat for how to wire this to arXiv + Semantic Scholar for real, auto-updating data.</div>
+
+  <div id="panel">
+    <button id="closeBtn">✕</button>
+    <div id="panel-content"></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+(function(){
+
+// Live data loads from data/graph.json (produced by build_graph.py) when served
+// over http(s). The arrays below are the fallback demo set used if that fetch
+// fails (e.g. opened as a bare local file, or before the pipeline has run yet).
+const FALLBACK_NODES = [
+  {id:"nganguli", name:"Nirmal Ganguli", inst:"IISER Bhopal", field:"gen", h:22,
+   tags:["DFT","2D magnets","spin-orbitronics"], site:"—"},
+  {id:"jmeyer", name:"Julia Meyer", inst:"CEA / Néel Inst., Grenoble", field:"sc", h:38,
+   tags:["Usadel eq.","SC-FM heterostructures","mesoscopics"], site:"—"},
+  {id:"jrobinson", name:"Jason Robinson", inst:"Univ. of Cambridge", field:"sc", h:41,
+   tags:["spin-triplet SC","Josephson junctions","thin films"], site:"—"},
+  {id:"nbirge", name:"Norman Birge", inst:"Michigan State Univ.", field:"sc", h:44,
+   tags:["odd-frequency SC","spin valves","cryogenic memory"], site:"—"},
+  {id:"agolubov", name:"Alexander Golubov", inst:"Univ. of Twente", field:"sc", h:63,
+   tags:["Josephson physics","proximity effect","SC theory"], site:"—"},
+  {id:"meschrig", name:"Matthias Eschrig", inst:"Royal Holloway, London", field:"sc", h:47,
+   tags:["quasiclassical theory","triplet pairing","SC-FM"], site:"—"},
+  {id:"jlinder", name:"Jacob Linder", inst:"NTNU Trondheim", field:"sc", h:45,
+   tags:["superconducting spintronics","altermagnets","BdG"], site:"—"},
+  {id:"ybernard", name:"F. S. Bergeret", inst:"CFM / DIPC, San Sebastián", field:"sc", h:50,
+   tags:["odd-frequency pairing","quasiclassical Green's fns"], site:"—"},
+  {id:"ctretiakov", name:"Oleg Tretiakov", inst:"UNSW Sydney", field:"mag", h:34,
+   tags:["magnon topology","skyrmions","antiferromagnetic spintronics"], site:"—"},
+  {id:"kyamamoto", name:"Kouki Nakata", inst:"NIMS Japan", field:"mag", h:20,
+   tags:["magnon Floquet physics","spin caloritronics"], site:"—"},
+  {id:"vfranchi", name:"Vitalii Kuchkin", inst:"Forschungszentrum Jülich", field:"topo", h:14,
+   tags:["topological magnons","Berry curvature","honeycomb lattices"], site:"—"},
+  {id:"rcheng", name:"Rembert Duine", inst:"Utrecht Univ.", field:"mag", h:48,
+   tags:["magnon-driven torque","spin caloritronics"], site:"—"},
+  {id:"nnagaosa", name:"Naoto Nagaosa", inst:"Univ. of Tokyo / RIKEN", field:"topo", h:112,
+   tags:["Berry phase theory","topological transport"], site:"—"},
+];
+
+const FALLBACK_EDGES = [
+  {s:"nganguli", t:"jmeyer", papers:[
+    {title:"Quasiclassical treatment of spin-triplet correlations in SC/FM heterostructures", venue:"in prep. (MS thesis work)", year:"2026", arxiv:"—"}
+  ]},
+  {s:"jmeyer", t:"meschrig", papers:[
+    {title:"Odd-frequency pairing and Usadel boundary conditions at SC-FM interfaces", venue:"Phys. Rev. B (illustrative)", year:"2020", arxiv:"arXiv:20xx.xxxxx"}
+  ]},
+  {s:"jmeyer", t:"ybernard", papers:[
+    {title:"Quasiclassical Green's functions for diffusive triplet transport", venue:"Phys. Rev. B (illustrative)", year:"2019", arxiv:"arXiv:19xx.xxxxx"}
+  ]},
+  {s:"jrobinson", t:"nbirge", papers:[
+    {title:"Long-range spin-triplet supercurrents in Ho-based junctions", venue:"Nat. Mater. (illustrative)", year:"2021", arxiv:"arXiv:21xx.xxxxx"},
+    {title:"Cryogenic memory elements from triplet Josephson junctions", venue:"Appl. Phys. Lett. (illustrative)", year:"2022", arxiv:"arXiv:22xx.xxxxx"}
+  ]},
+  {s:"jrobinson", t:"meschrig", papers:[
+    {title:"Symmetry classification of triplet pairing at ferromagnetic interfaces", venue:"Rev. Mod. Phys. (illustrative)", year:"2018", arxiv:"arXiv:18xx.xxxxx"}
+  ]},
+  {s:"nbirge", t:"agolubov", papers:[
+    {title:"Josephson coupling through strong ferromagnets: theory and experiment", venue:"Phys. Rev. B (illustrative)", year:"2017", arxiv:"arXiv:17xx.xxxxx"}
+  ]},
+  {s:"agolubov", t:"jlinder", papers:[
+    {title:"Proximity-induced altermagnetic order in SC/AM bilayers", venue:"Phys. Rev. Lett. (illustrative)", year:"2024", arxiv:"arXiv:24xx.xxxxx"}
+  ]},
+  {s:"jlinder", t:"meschrig", papers:[
+    {title:"Quasiclassical theory of superconducting spintronics: a review", venue:"Rev. Mod. Phys. (illustrative)", year:"2023", arxiv:"arXiv:23xx.xxxxx"}
+  ]},
+  {s:"jlinder", t:"ybernard", papers:[
+    {title:"Odd-frequency triplet correlations in altermagnet junctions", venue:"Phys. Rev. B (illustrative)", year:"2024", arxiv:"arXiv:24xx.xxxxx"}
+  ]},
+  {s:"ctretiakov", t:"vfranchi", papers:[
+    {title:"Topological magnon bands in honeycomb antiferromagnets", venue:"Phys. Rev. B (illustrative)", year:"2022", arxiv:"arXiv:22xx.xxxxx"}
+  ]},
+  {s:"vfranchi", t:"kyamamoto", papers:[
+    {title:"Floquet engineering of magnon Chern numbers under circular drive", venue:"Phys. Rev. Research (illustrative)", year:"2023", arxiv:"arXiv:23xx.xxxxx"}
+  ]},
+  {s:"kyamamoto", t:"rcheng", papers:[
+    {title:"Spin Nernst effect from magnon Berry curvature", venue:"Phys. Rev. B (illustrative)", year:"2021", arxiv:"arXiv:21xx.xxxxx"}
+  ]},
+  {s:"rcheng", t:"nnagaosa", papers:[
+    {title:"Topological transport of magnons and phonons: unified perspective", venue:"Rev. Mod. Phys. (illustrative)", year:"2020", arxiv:"arXiv:20xx.xxxxx"}
+  ]},
+  {s:"nnagaosa", t:"vfranchi", papers:[
+    {title:"Berry curvature engineering in driven bosonic lattices", venue:"Nat. Phys. (illustrative)", year:"2023", arxiv:"arXiv:23xx.xxxxx"}
+  ]},
+  {s:"nganguli", t:"ctretiakov", papers:[
+    {title:"DFT-derived exchange parameters for honeycomb antiferromagnet magnon topology", venue:"in prep.", year:"2026", arxiv:"—"}
+  ]},
+];
+
+const fieldColor = {sc:"var(--sc)", topo:"var(--topo)", mag:"var(--mag)", gen:"var(--gen)"};
+
+const svg = d3.select("#canvas");
+const g = svg.append("g");
+let width = window.innerWidth, height = window.innerHeight;
+
+function render(nodes, edges){
+
+svg.call(d3.zoom().scaleExtent([0.35,2.5]).on("zoom", (ev)=> g.attr("transform", ev.transform)));
+
+const linkData = edges.map(e => ({...e, source:e.s, target:e.t}));
+
+const sim = d3.forceSimulation(nodes)
+  .force("link", d3.forceLink(linkData).id(d=>d.id).distance(150).strength(0.5))
+  .force("charge", d3.forceManyBody().strength(-620))
+  .force("center", d3.forceCenter(width/2, height/2))
+  .force("collide", d3.forceCollide(46));
+
+function hexPath(r){
+  const pts = d3.range(6).map(i=>{
+    const a = Math.PI/180 * (60*i - 90);
+    return [r*Math.cos(a), r*Math.sin(a)];
+  });
+  return "M" + pts.map(p=>p.join(",")).join("L") + "Z";
+}
+
+const linkHit = g.append("g").selectAll("path").data(linkData).join("path")
+  .attr("class","edge-hit")
+  .on("mouseenter", function(ev,d){ showEdgeTip(d, ev); })
+  .on("mousemove", function(ev,d){ moveTip(ev); })
+  .on("mouseleave", hideTip)
+  .on("click", function(ev,d){ openPanelEdge(d); });
+
+const link = g.append("g").selectAll("path").data(linkData).join("path")
+  .attr("class","edge")
+  .attr("stroke-width", d=> 1.2 + d.papers.length*1.1);
+
+const node = g.append("g").selectAll("g").data(nodes).join("g")
+  .attr("class","node")
+  .call(d3.drag()
+    .on("start",(ev,d)=>{ if(!ev.active) sim.alphaTarget(0.25).restart(); d.fx=d.x; d.fy=d.y; })
+    .on("drag",(ev,d)=>{ d.fx=ev.x; d.fy=ev.y; })
+    .on("end",(ev,d)=>{ if(!ev.active) sim.alphaTarget(0); d.fx=null; d.fy=null; }));
+
+node.append("path")
+  .attr("class","node-hex")
+  .attr("d", d=> hexPath(16 + d.h*0.12))
+  .attr("fill", d=> fieldColor[d.field])
+  .on("click", (ev,d)=>{ ev.stopPropagation(); openPanelNode(d); });
+
+node.append("text").attr("class","node-label").attr("text-anchor","middle").attr("dy", d=> -(16+d.h*0.12)-8)
+  .text(d=>d.name);
+node.append("text").attr("class","node-inst").attr("text-anchor","middle").attr("dy", d=> (16+d.h*0.12)+13)
+  .text(d=>d.inst);
+
+sim.on("tick", ()=>{
+  link.attr("d", d=> `M${d.source.x},${d.source.y}L${d.target.x},${d.target.y}`);
+  linkHit.attr("d", d=> `M${d.source.x},${d.source.y}L${d.target.x},${d.target.y}`);
+  node.attr("transform", d=> `translate(${d.x},${d.y})`);
+});
+
+// tooltip for edges
+const tip = d3.select("#app").append("div").style("position","absolute").style("pointer-events","none")
+  .style("background","rgba(18,26,46,0.95)").style("border","1px solid var(--line)").style("border-radius","6px")
+  .style("padding","8px 11px").style("font-family","'JetBrains Mono',monospace").style("font-size","10.5px")
+  .style("color","var(--ink)").style("max-width","260px").style("opacity",0).style("z-index",20)
+  .style("transition","opacity 0.12s").style("line-height","1.5");
+
+function showEdgeTip(d, ev){
+  const src = nodes.find(n=>n.id===(d.source.id||d.source));
+  const tgt = nodes.find(n=>n.id===(d.target.id||d.target));
+  tip.html(`<b>${src.name} ↔ ${tgt.name}</b><br>${d.papers.length} joint paper${d.papers.length>1?'s':''} · click for details`)
+    .style("opacity",1);
+  moveTip(ev);
+}
+function moveTip(ev){ tip.style("left",(ev.clientX+14)+"px").style("top",(ev.clientY+10)+"px"); }
+function hideTip(){ tip.style("opacity",0); }
+
+// side panel
+const panel = document.getElementById("panel");
+const panelContent = document.getElementById("panel-content");
+document.getElementById("closeBtn").onclick = ()=> panel.classList.remove("open");
+svg.on("click", ()=> panel.classList.remove("open"));
+
+function openPanelNode(d){
+  const myEdges = linkData.filter(e => (e.source.id||e.source)===d.id || (e.target.id||e.target)===d.id);
+  const totalPapers = myEdges.reduce((a,e)=>a+e.papers.length,0);
+  panelContent.innerHTML = `
+    <div class="eyebrow">Investigator</div>
+    <h2>${d.name}</h2>
+    <div class="role">${d.inst}</div>
+    ${d.tags.map(t=>`<span class="field-tag">${t}</span>`).join("")}
+    <div class="stat-row">
+      <div class="stat"><b>${d.h}</b><span>h-index</span></div>
+      <div class="stat"><b>${myEdges.length}</b><span>collaborators</span></div>
+      <div class="stat"><b>${totalPapers}</b><span>joint papers</span></div>
+    </div>
+    <div class="coauthors">
+      <h3>Collaborators</h3>
+      ${myEdges.map(e=>{
+        const other = nodes.find(n=> n.id === ((e.source.id||e.source)===d.id ? (e.target.id||e.target) : (e.source.id||e.source)));
+        return `<span class="coauthor-pill" data-id="${other.id}">${other.name} <span style="color:var(--ink-dim)">— ${e.papers.length} paper${e.papers.length>1?'s':''}</span></span>`;
+      }).join("")}
+    </div>`;
+  panel.classList.add("open");
+  panelContent.querySelectorAll(".coauthor-pill").forEach(el=>{
+    el.onclick = ()=> openPanelNode(nodes.find(n=>n.id===el.dataset.id));
+  });
+}
+
+function openPanelEdge(d){
+  const src = nodes.find(n=>n.id===(d.source.id||d.source));
+  const tgt = nodes.find(n=>n.id===(d.target.id||d.target));
+  panelContent.innerHTML = `
+    <div class="eyebrow">Collaboration</div>
+    <h2 style="font-size:17px">${src.name} × ${tgt.name}</h2>
+    <div class="role">${src.inst} · ${tgt.inst}</div>
+    <div style="margin-top:16px">
+      ${d.papers.map(p=>`
+        <div class="paper">
+          <div class="paper-title">${p.title}</div>
+          <div class="paper-meta">${p.venue} · ${p.year} · ${p.arxiv}</div>
+        </div>`).join("")}
+    </div>`;
+  panel.classList.add("open");
+}
+
+window.addEventListener("resize", ()=>{
+  width = window.innerWidth; height = window.innerHeight;
+  sim.force("center", d3.forceCenter(width/2, height/2));
+  sim.alpha(0.3).restart();
+});
+
+} // end render()
+
+// --- bootstrap: try live data/graph.json (from build_graph.py), else fall back ---
+const banner = document.getElementById("banner");
+
+fetch("data/graph.json")
+  .then(r => { if(!r.ok) throw new Error("no graph.json"); return r.json(); })
+  .then(data => {
+    banner.innerHTML = `<b>Live data</b> · generated ${new Date(data.generatedAt).toLocaleString()} · sourced from Semantic Scholar, arXiv, OpenAlex${data.nodes.some(n=>n.site && n.site!=="—") ? ", Google Scholar" : ""}.`;
+    render(data.nodes, data.edges);
+  })
+  .catch(() => {
+    render(FALLBACK_NODES, FALLBACK_EDGES);
+  });
+
+})();
+</script>

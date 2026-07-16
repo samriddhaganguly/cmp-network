@@ -1,0 +1,32 @@
+name: Update collaboration graph
+
+on:
+  schedule:
+    - cron: "0 6 * * *"   # daily, 06:00 UTC — adjust to taste
+  workflow_dispatch: {}     # lets you trigger it manually from the Actions tab
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - run: pip install -r requirements.txt
+
+      # Google Scholar scraping is unreliable from CI datacenter IPs (see
+      # build_graph.py docstring). Run this workflow with --no-scholar and
+      # refresh Scholar-sourced fields separately from a personal machine
+      # every so often, e.g. `python build_graph.py` (no flag) locally.
+      - run: python build_graph.py --no-scholar --out data/graph.json
+
+      - name: Commit updated graph
+        run: |
+          git config user.name "graph-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/graph.json
+          git diff --quiet --cached || git commit -m "Auto-update collaboration graph"
+          git push
